@@ -1,12 +1,56 @@
-import { MapContainer, Marker, Popup, TileLayer, Tooltip, Polyline, CircleMarker, Circle  } from 'react-leaflet'
-import 'leaflet/dist/leaflet.css'
-
+import { MapContainer, TileLayer, Tooltip, Polyline, CircleMarker, LayerGroup, useMap, Circle} from 'react-leaflet'
 import React, { useEffect, useState } from "react";
+import 'leaflet/dist/leaflet.css'
+import { marker } from 'leaflet';
 
-const Map = ({places}) => {
+function MyLayer(props, ref) {
+  const { defaultMarkers, socket } = props;
+  const [markers, setMarkers] = useState(defaultMarkers);
+  const [last, setLast] =useState({});
+  const redOptions = { color: 'red' }
 
-  const actualOptions = { color: 'black'}
-  const realLineOptions = { color: 'black', dashArray: '8'}
+  useEffect(() => {
+    socket.on('POSITION', newMarker => {
+      setMarkers((existingMarkers) => [...existingMarkers, newMarker]);
+      last[newMarker.code] = newMarker.position;
+      setLast({...last});
+    });
+  }, []);
+   
+  return (
+    <LayerGroup>
+      {markers.map((marker, idx) => {
+        return (
+          <Circle
+            key={idx}
+            center={marker.position}
+            radius={5}
+          >
+            <Tooltip>{marker.code}</Tooltip>
+          </Circle>
+        );
+      })}
+      {Object.keys(last).map((key) => {
+        return (
+          <CircleMarker
+            key={key}
+            center={last[key]}
+            radius={3}
+            pathOptions={redOptions}
+          >
+            <Tooltip>{`Actual ${key}`}</Tooltip>
+          </CircleMarker>
+        );
+      })}
+    </LayerGroup>
+  );
+}
+
+
+
+const Map = ({places, socket}) => {
+  const [markers, setMarkers] = useState([]);
+
   const teoricLineOptions = { color: 'lime', dashArray: '8'}
   const redOptions = { color: 'red' }
   const blueOptions = { color: 'blue' }
@@ -36,6 +80,12 @@ const Map = ({places}) => {
         </Polyline>
       ))}
 
+      {/* {positions.map((position) => (
+        <Circle key={`${position.code}-${position.position[0]}-${position.position[1]}`}  positions= {position.position} radius={5}>
+          <Tooltip>{position.code}</Tooltip>
+        </Circle>
+      ))} */}
+      <MyLayer defaultMarkers={markers} socket={socket} />
     </MapContainer>
   )
 }

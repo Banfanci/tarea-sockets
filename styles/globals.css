@@ -281,3 +281,17 @@ input:focus, textarea:focus, select:focus{
 .messages-info{
   line-height: 0%;
 }
+
+.pasajerosText {
+  font-family: Helvetica;
+  color: #828282;
+  letter-spacing: 0.3px;
+  word-wrap: break-word;
+}
+
+.pasajeros {
+  display: flex;
+  justify-content: flex-start;
+  padding: 0 1px;
+  margin-top: 3px;
+}

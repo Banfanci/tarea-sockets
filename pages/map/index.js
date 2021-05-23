@@ -14,12 +14,6 @@ const socket = socketIOClient(ENDPOINT, {
 });
 
 
-const Map = dynamic(
-  () => import('../../components/map'), // replace '@components/map' with your component's location
-  { ssr: false } // This line is important. It's what prevents server-side render
-)
-
-
 export default function Home() {
   
   const [name, setName] = useState("");
@@ -27,8 +21,14 @@ export default function Home() {
   const [messages, setMessages] = useState([]);
   const [flights, setFlights] = useState([]);
   const [vuelosRegistrados, setVuelosRegistrados] = useState([]);
-  const [rutas, setRutas] = useState({});
-  const [actual, setActual] = useState({});
+
+  const Map = React.useMemo(() => dynamic(
+    () => import('../../components/map'), // replace '@components/map' with your component's location
+    { 
+      loading: () => <p>A map is loading</p>,
+      ssr: false // This line is important. It's what prevents server-side render
+    }
+  ), [flights])
 
   const requestFlights = () => {
     socket.emit('FLIGHTS');
@@ -51,27 +51,11 @@ export default function Home() {
       vuelos.forEach(vuelo => {
         if (! vuelosRegistrados.includes(vuelo.code)){
           vuelosRegistrados.push(vuelo.code);
-          rutas[vuelo.code] = [];
         }
       });
       setVuelosRegistrados([...vuelosRegistrados]);
-      setRutas({...rutas});
-    });
-
-    socket.on('POSITION', pos => {
-      if (! vuelosRegistrados.includes(pos.code)){
-        rutas[pos.code] = [];
-        requestFlights();
-      }
-      
-      actual[pos.code] = pos.position;
-      setActual({...actual});
-
-      rutas[pos.code].push(pos.position);
-      setActual({...rutas});
     });
   }, []);
-
 
   // to send a message
   const sendMessage = (event) => {
@@ -87,7 +71,7 @@ export default function Home() {
     <div>
       <div className="map-chat">
         <div className="mapa">
-          <Map places={flights} rutas={rutas} actual={[]}/>
+          <Map places={flights} socket={socket}/>
         </div>
         <div className="outerContainer">
             <div className="container">
