@@ -14,7 +14,10 @@ export const Message = ({message, name}) => {
     isSentByCurrentUser
     ? (
         <div className="messageContainer justifyEnd">
-            <p className="sentText pr-10">{name}</p>
+            <div className="messages-info">
+                <p className="sentText pr-10 justifyEnd">{`${name}`}</p>
+                <p className="sentText pr-10">{`${new Date(message.date).toLocaleString()}`}</p>
+            </div>
             <div className="messageBox backgroundBlue">
                 <p className="messageText colorWhite">{ReactEmoji.emojify(message.message)}</p>
             </div>
@@ -25,7 +28,10 @@ export const Message = ({message, name}) => {
             <div className="messageBox backgroundLight">
                 <p className="messageText colorDark">{message.message}</p>
             </div>
-            <p className="sentText pl-10">{message.name}</p>
+            <div className="messages-info">
+                <p className="sentText pl-10">{`${message.name}`}</p>
+                <p className="sentText pl-10">{`${new Date(message.date).toLocaleString()}`}</p>
+            </div>
         </div>
     ) 
     )
